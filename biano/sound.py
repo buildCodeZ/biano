@@ -23,11 +23,11 @@ def f(rate, n, sec = 1.0):
     data = np.zeros(size+size, dtype = ndtype)
     for i in range(size):
         x0 = i*2*math.pi*rate/fps
-        sound = 1/(1+abs(mid - n))
-        sound = math.cos(abs(mid-n)/50*math.pi*0.5)
+        #sound = math.cos(abs(mid-n)/50*math.pi*0.5)
+        sound = 1-abs(mid-n)/50
         if n > mid:
             sound = -sound
-        y = math.sin(x0)*(0.6+sound*0.4)
+        y = math.sin(x0)*(0.7+sound*0.3)
         y *= (size-i)/size
         #y *= math.cos(i*math.pi/size)*0.5+0.5
         y *= nrange

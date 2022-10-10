@@ -3,42 +3,51 @@
 import pyaudio
 import numpy as np
 import math
-fps = 4096
+fps = 4096*10
 p = pyaudio.PyAudio()
+nbyte = 2
+ndtype = np.int16
+nmax = (1<<(nbyte<<3))-1
 
-# stream = p.open(format=p.get_format_from_width(1),
-#                 channels=1,
-#                 rate=fps,
-#                 output=True)
-# pass
+nrange = nmax/2
+nrange = (nmax+1)/2
+def fn(n):
+    return 27.5*(2**(1/12))**(n-1)
 
-def f(rate, sec = 1.0):
-    #print("f:"+str(rate))
+pass
+
+mid = 50
+def f(rate, n, sec = 1.0):
     global fps
     size = int(fps * sec)
-    data = np.zeros(size, dtype = np.uint8)
+    data = np.zeros(size+size, dtype = ndtype)
     for i in range(size):
-        x = i*2*math.pi*rate/fps
-        y = math.sin(x)*128
-        y = y * (size-i)/size
-        y += 128
-        y = min(255, y)
+        x0 = i*2*math.pi*rate/fps
+        sound = 1/(1+abs(mid - n))
+        sound = math.cos(abs(mid-n)/50*math.pi*0.5)
+        if n > mid:
+            sound = -sound
+        y = math.sin(x0)*(0.6+sound*0.4)
+        y *= (size-i)/size
+        #y *= math.cos(i*math.pi/size)*0.5+0.5
+        y *= nrange
+        y = max(-nrange,min(nrange-1, y))
         data[i] = y
-    return bytes(list(data))
+    return data#rst
 
 pass
 
 class CacheFc:
     def __init__(self):
         self.cache = {}
-    def __call__(self, rate):
+    def __call__(self, rate, n):
         if rate not in self.cache:
-            self.cache[rate] = f(rate, 1.0)
+            self.cache[rate] = f(rate, n, 1.0)
         return self.cache[rate]
 
 pass
 def create():
-    return p.open(format=p.get_format_from_width(1), channels=1, rate=fps, output=True)
+    return p.open(format=p.get_format_from_width(nbyte), channels=1, rate=fps, output=True)
 
 pass
 
@@ -49,10 +58,6 @@ def close(stream):
 pass
 import threading
 
-def fn(n):
-    return 27.5*(2**(1/12))**(n-1)
-
-pass
 
 class Sound:
     def __init__(self):
@@ -62,9 +67,9 @@ class Sound:
         self.lock = threading.Lock()
     def _play(self, data, id):
         self.frees[id].write(data)
-    def play(self, rate):
-        rate = fn(rate)
-        data = self.fc(rate)
+    def play(self, n):
+        rate = fn(n)
+        data = self.fc(rate, n)
         with self.lock:
             id = self.index
             self.index = (self.index+1)%20

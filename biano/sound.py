@@ -18,26 +18,27 @@ pass
 
 mid = 50
 import random
-def f(rate, n, sec = 1.0):
+def f(rate, n, sec = 1.0, msound = 1.0):
     global fps
     size = int(fps * sec)
-    prev = 0*int(size*0.02)
+    prev = 0#int(size*0.02)
     data = np.zeros(prev+size+int(size+0.5), dtype = ndtype)
+    # 频率越高，声音越小
+    #sound = 1-(mid-n)*(mid-n)/(120*120)
+    sound = (100-n)**2/100**2
+    #if n > mid:
+    #    sound = -sound
     for i in range(size):
         x0 = i*2*math.pi*rate/fps
         #x0 += (random.random()-0.5)*0.1
         #sound = math.cos(abs(mid-n)/50*math.pi*0.5)
-        # 50的音亮最大，再往左或往右的音量都调小
-        sound = 1-abs(mid-n)/50
-        if n > mid:
-            sound = -sound
-        y = math.sin(x0)*(0.7+sound*0.3)
+        y = math.sin(x0)*(0.1*sound+sound*0.9)
         #y *=(1+(random.random()-0.5)*0.1)
         r = (size-i)/size
-        y *= r
+        y *= r*msound
         #y *= math.cos(i*math.pi/size)*0.5+0.5
         y *= nrange
-        y = max(-nrange,min(nrange-1, y))
+        y = max(-nrange+1,min(nrange-1, y))
         data[prev+i] = y
     return data#rst
 
@@ -69,7 +70,9 @@ class Sound:
     def run_zero(self):
         global fps
         size = int(fps)
-        data = np.zeros(size, dtype = ndtype)
+        n = 50
+        rate = fn(n)
+        data = f(rate, n, 2.0, 0.001)
         while self.running:
             self.zero.write(data)
         close(self.zero)
@@ -98,10 +101,10 @@ class Sound:
         th.start()
     def close(self):
         import time
+        self.running = False
         time.sleep(1.0)
         for st in self.frees:
             close(st)
-        self.running = False
 
 pass
 sd = Sound()

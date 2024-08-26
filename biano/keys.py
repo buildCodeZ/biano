@@ -2,7 +2,7 @@
 
 import pynput
 from pynput.keyboard import Listener, Key
-from biano import sound
+from biano import sound1 as sound
 
 
 ctls = list("1234567890")
@@ -41,18 +41,15 @@ moves = [0,0]
 mvs = "-="
 pressed = set()
 pressed = set()
+c='3'
+bases[c2base[c]] = c2i[c]*len(lefts)+16
+c='9'
+bases[c2base[c]] = c2i[c]*len(lefts)+16
 def press(key):
     global moves
     if hasattr(key, "char"):
         c = key.char
-        if c in mvs:
-            if c == "-":
-                moves = [0,0]
-            else:
-                moves = [-24, 24]
-        elif c in ctls:
-            bases[c2base[c]] = c2i[c]*len(lefts)+16
-        elif c in maps:
+        if c in maps:
             if c in pressed:
                 return
             vc = maps[c] + bases[k2base[c]]+moves[k2base[c]]
@@ -60,9 +57,28 @@ def press(key):
                 return
             if vc >= 89:
                 return
+            sound.sd.play(vc)
+            #print(vc)
             pressed.add(c)
             #print(vc)
-            sound.sd.play(vc)
+        elif c in mvs:
+            if c == "-":
+                moves = [0,0]
+            else:
+                moves = [-24, 24]
+        elif c in ctls:
+            bases[c2base[c]] = c2i[c]*len(lefts)+16
+        # elif c in maps:
+        #     if c in pressed:
+        #         return
+        #     vc = maps[c] + bases[k2base[c]]+moves[k2base[c]]
+        #     if vc <= 0:
+        #         return
+        #     if vc >= 89:
+        #         return
+        #     pressed.add(c)
+        #     #print(vc)
+        #     sound.sd.play(vc)
     global lst
     if key == Key.esc:
         lst.stop()

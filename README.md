@@ -33,4 +33,8 @@ number keys 6,7,8,9,0 modify base tone of right hand
 按键-和=修改数字键音调偏移
 keys - and = modify number key tone offset
 
+v0.2.2:
+加缓存，原本创建多个声音对象改成使用一个声音对象，用缓存方式进行读写，减少杂音，但会增加延迟
+音色有待调整
+
 ```

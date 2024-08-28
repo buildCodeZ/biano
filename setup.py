@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'biano',
-    version = '0.2.2',
+    version = '0.2.3',
     keywords='biano',
     long_description=open('README.md', 'r', encoding="utf-8").read(),
     long_description_content_type='text/markdown',
@@ -19,5 +19,5 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     platforms = 'any',
-    install_requires = ['pynput>=1.7.6', 'numpy>=1.22.2', 'PyAudio>=0.2.12'],
+    install_requires = ['pynput>=1.7.6', 'numpy>=1.20.0', 'PyAudio>=0.2.12','buildz>=0.6.9'],
 )

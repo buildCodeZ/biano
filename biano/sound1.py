@@ -127,20 +127,14 @@ import threading
 
 
 class Sound:
+    def mode(self, val):
+        self.stream.mode(val)
     def __init__(self):
         self.fc = CacheFc()
         self.zero = create()
         #print(fps)
         self.stream = cache.Stream(self.zero.write, nrange,100, int(fps*0.05), ndtype, left=1)
         self.stream.start()
-        # self.frees = [create() for i in range(20)]
-        # self.zero = create() #一直播放着空旋律，避免噪音
-        # self.index = 0
-        # self.lock = threading.Lock()
-        # self.running = True
-        # th = threading.Thread(target = self.run_zero)
-        # th.setDaemon(True)
-        # th.start()
     def play(self, n):
         if not self.stream.running:
             return

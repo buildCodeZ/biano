@@ -6,6 +6,13 @@ from buildz.tools import *
 import threading as th
 import time
 class Stream(Base):
+    def mode(self, val):
+        if val == 'weight':
+            self.combine = self.combine_add
+        elif val == 'mix':
+            self.combine = self.combine_diff
+        else:
+            raise Exception(f"unregonize mode: {val}")
     def run(self):
         self.running = True
         self.loop()
@@ -32,6 +39,8 @@ class Stream(Base):
         self.output = output
         self.offset = 0
         self.lock_offset = -1
+        self.totals = []
+        self.combine = self.combine_add
     def loop(self):
         while self.running:
             while self.running:
@@ -45,6 +54,15 @@ class Stream(Base):
                     self.offset=(self.offset+1)%self.num
                     break
             self.output(tmp.tobytes())
+            #self.totals.append(tmp)
+    def combine_diff(self, tmp, data1):
+        tmp[::2]=0
+        data1[1::2]=0
+        return tmp+data1
+    def combine_add(self, tmp, data1):
+        return 1*(tmp*self.r_old+data1*self.r_new)
+    def combine(self, tmp, data1):
+        return 1*(tmp*self.r_old+data1*self.r_new)
     def add(self, data):
         with self.lock:
             off = (self.offset+self.left)%self.num
@@ -55,13 +73,13 @@ class Stream(Base):
         data1=data
         if l1!=l:
             data1=data[:l1]
-        tmp[:] = np.maximum(np.minimum(1*(tmp*self.r_old+data1*self.r_new),1.0), -1.0)
+        tmp[:] = np.maximum(np.minimum(self.combine(tmp, data1),1.0), -1.0)
         #tmp[:] = np.maximum(np.minimum(tmp, 1.0), -1.0)
         if l1!=l:
             left = l-l1
             tmp = self.data[:left]
             data1 = data[l1:]
-            tmp[:] = np.maximum(np.minimum(1*(tmp*self.r_old+data1*self.r_new),1.0), -1.0)
+            tmp[:] = np.maximum(np.minimum(self.combine(tmp, data1),1.0), -1.0)
             #tmp[:] = np.maximum(np.minimum(tmp, 1.0), -1.0)
         with self.lock:
             self.lock_offset=-1

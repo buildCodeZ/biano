@@ -9,7 +9,7 @@ sys.path.append(r"D:\downloads\codes\python\pydub-0.25.1")
 pyz.add(__file__)
 
 from pydub import AudioSegment
-audio_file=r"D:\rootz\data\music\稻香guita.mp3"
+audio_file=r"D:\rootz\data\music\guita.mp3"
 audio = AudioSegment.from_file(audio_file)
 x = audio.get_array_of_samples()
 nx = np.array(x)

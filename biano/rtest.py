@@ -1,4 +1,7 @@
-#coding=utf-8
+#
+import sys
+from buildz import pyz
+pyz.add(__file__)
 from biano import confkeys as keys
 def run():
     keys.run()

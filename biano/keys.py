@@ -1,9 +1,15 @@
 #coding=utf-8
 
 import pynput
-from pynput.keyboard import Listener, Key
+from buildz.tz import getch
 from biano import sound1 as sound
+try:
+    from .pynkb import KB
+except:
+    #一般不会报错到这里
+    from .bzkb import KB
 
+pass
 
 ctls = list("1234567890")
 c2base = {}
@@ -45,22 +51,17 @@ c='3'
 bases[c2base[c]] = c2i[c]*len(lefts)+16
 c='9'
 bases[c2base[c]] = c2i[c]*len(lefts)+16
-def press(key):
+def press(key, kb):
+    c = kb.char(key)
     global moves
-    if hasattr(key, "char"):
-        c = key.char
+    if c is not None:
         if c in maps:
-            if c in pressed:
-                return
             vc = maps[c] + bases[k2base[c]]+moves[k2base[c]]
             if vc <= 0:
                 return
             if vc >= 89:
                 return
             sound.sd.play(vc)
-            #print(vc)
-            pressed.add(c)
-            #print(vc)
         elif c in mvs:
             if c == "-":
                 moves = [0,0]
@@ -68,37 +69,13 @@ def press(key):
                 moves = [-24, 24]
         elif c in ctls:
             bases[c2base[c]] = c2i[c]*len(lefts)+16
-        # elif c in maps:
-        #     if c in pressed:
-        #         return
-        #     vc = maps[c] + bases[k2base[c]]+moves[k2base[c]]
-        #     if vc <= 0:
-        #         return
-        #     if vc >= 89:
-        #         return
-        #     pressed.add(c)
-        #     #print(vc)
-        #     sound.sd.play(vc)
-    global lst
-    if key == Key.esc:
-        lst.stop()
+    if kb.is_esc(key):
+        kb.stop()
         sound.sd.close()
         sound.release()
 
 pass
-
-def release(key):
-    if hasattr(key, "char"):
-        c = key.char
-        if c not in maps:
-            return
-        if c in pressed:
-            pressed.remove(c)
-
-pass
-lst = None
 def run():
-    global lst
     print("按键: 左手: qwertasdfzxc 右手: yuiophjklnm,")
     print("修改音调: 左手按键: 1,2,3,4,5 右手按键: 6,7,8,9,0")
     print("修改模式: 按-或=")
@@ -107,8 +84,8 @@ def run():
     print("change tone: left: press 1,2,3,4,5 right: press 6,7,8,9,0")
     print("change mode: press - or =")
     print("press esc to exit")
-    with Listener(on_press=press, on_release=release) as lst:
-        lst.join()
+    KB(press).run()
+    print("exist")
 
 pass
 if __name__=="__main__":

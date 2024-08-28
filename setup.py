@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'biano',
-    version = '0.2.3',
+    version = '0.2.31',
     keywords='biano',
     long_description=open('README.md', 'r', encoding="utf-8").read(),
     long_description_content_type='text/markdown',

@@ -36,8 +36,8 @@ offsets: {
 }
 // 声音混合模式: mix/weight
 combines: {
-    '*': weight
-    "!": mix
+    '+': weight
+    "_": mix
 }
 // 按键监听模式: 
 // full: 全局
@@ -45,5 +45,5 @@ combines: {
 kb: full
 // 初始化，自动按这些键
 inits: [
-    '3','9', '*', '-'
+    '3','9', '+', '-'
 ]

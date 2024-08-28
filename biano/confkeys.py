@@ -105,39 +105,16 @@ def run():
         fp = sys.argv[1]
     conf = xf.loadf(dfp)
     if fp is not None:
+        bak = fp
+        if not os.path.isfile(fp):
+            fp = os.path.join(res, fp)
+        if not os.path.isfile(fp):
+            raise Exception(f"config file not found: {bak}")
         nconf = xf.loadf(fp)
         xf.fill(conf, nconf, 0)
         conf = nconf
     ConfPress(conf).run()
     return
-    mlefts = conf['left']
-    mrights = conf['right']
-    for k in mlefts:
-        k2base[k] = 0
-        maps[k] = mlefts[k]
-    for k in mrights:
-        k2base[k] = 1
-        maps[k] = mrighs[k]
-    lks = list(mlefts.keys())
-    lks = "".join(lks)
-    rks = list(mrights.keys())
-    rks = "".join(rks)
-    mbases = conf['bases']
-    nbs = ",".join(list(mbases.keys()))
-    moffsets = conf['offsets']
-    nofs = ",".join(list(moffsets.keys()))
-    print(f"按键: 左手: {lks} 右手: {rks}")
-    print(f"修改音调: 按键: {nbs}")
-    print(f"修改模式: 按键: {nofs}")
-    print("按esc退出")
-    print(f"press to sound: left: {lks} right: {rks}")
-    print(f"change tone: press {nbs}")
-    print(f"change mode: press {nofs}")
-    print("press esc to exit")
-    mcombines = conf['combines']
-    inits = conf['inits']
-    KB(press).run()
-    print("exist")
 
 pass
 if __name__=="__main__":

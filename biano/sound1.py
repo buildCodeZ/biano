@@ -94,7 +94,34 @@ def f2(rate, n, sec = 1.0, msound = 1.0, index=0):
     return data#rst
 
 pass
-f=f2
+def f3(rate, n, sec = 1.0, msound = 1.0, index=0):
+    """
+    rate: 频率
+    n: 乐谱音符（1234567）
+    sec: 声波发音时间，单位秒
+    msound: 全局音量大小
+    """
+    global fps #每秒取样数
+    size = int(fps * sec)
+    #data = np.zeros(size+int(size*0.5), dtype = np.float32)
+    data = np.arange(0,size+int(size*0.5), 1.0)
+    # 频率越高，声音越小
+    #sound = 1-(mid-n)*(mid-n)/(120*120)
+    sound = (100-n)**2/100**2
+    #if n > mid:
+    #    sound = -sound
+    offset = index*math.pi*0.03*random.random()*0
+    x = data[:size]
+    x0 = x*2*math.pi*rate/fps
+    y = np.sin(x0+offset)*sound
+    r = (size-x)/size
+    y *= r*msound
+    data[:size]=y
+    data[size:]=0
+    return data
+
+pass
+f=f3
 import random
 class CacheFc:
     def __init__(self,n=10):
@@ -127,12 +154,20 @@ import threading
 
 
 class Sound:
+    def sound(self, val):
+        self.stream.sound(val)
+    def do_record(self, val=True):
+        self.stream.do_record(val)
+    def records(self):
+        return self.stream.out_records()
     def mode(self, val):
         self.stream.mode(val)
     def __init__(self):
         self.fc = CacheFc()
+        for i in range(15,79):
+            rate = fn(i)
+            self.fc(rate, i)
         self.zero = create()
-        #print(fps)
         self.stream = cache.Stream(self.zero.write, nrange,100, int(fps*0.05), ndtype, left=1)
         self.stream.start()
     def play(self, n):

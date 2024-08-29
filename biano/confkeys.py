@@ -32,6 +32,8 @@ class ConfPress(Base):
         self.mcombines = conf['combines']
         self.inits = conf['inits']
         self.skb = conf['kb']
+        self.vsound = xf.g(conf, sound=1.0)
+        sound.sd.sound(self.vsound)
         if self.skb == 'full':
             from .pynkb import KB
             self.kb = KB(self.press)

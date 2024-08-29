@@ -7,6 +7,11 @@ python -m biano
 or
 python -m biano configpath.js
 
+演奏乐谱：
+python -m biano.play 配置文件.js
+默认乐谱:
+python -m biano.play
+
 运行复杂按键模式（建议先看下hard.js配置，在biano模块文件夹/res目录下）:
 python -m biano hard.js
 
@@ -49,4 +54,9 @@ python -m biano 配置文件.js
 配置见: biano模块文件夹/res/conf.js(默认配置文件)
 程序会先读取默认配置文件，再读取命令行指令配置文件进行更新
 噪声有待处理
+
+v0.2.4:
+加乐谱演奏模式
+python -m biano.play 配置文件.js
+噪音有待处理
 ```

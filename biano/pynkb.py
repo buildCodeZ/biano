@@ -11,7 +11,7 @@ class KB(kb.KB):
         return key == Key.esc
     def stop(self):
         self.lst.stop()
-    def init(self, callback):
+    def init(self, callback=None):
         super().init(callback)
         self.pressed = set()
     def press(self, key):

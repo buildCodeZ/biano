@@ -4,6 +4,7 @@ import pyaudio
 import numpy as np
 import math
 from . import cache
+from buildz import Base
 fps = 4096*10*8
 p = pyaudio.PyAudio()
 nbyte = 2
@@ -23,77 +24,8 @@ def fn(n):
 
 pass
 
-def f1(rate, n, sec = 1.0, msound = 1.0):
-    """
-    rate: 频率
-    n: 乐谱音符（1234567）
-    sec: 声波发音时间，单位秒
-    msound: 全局音量大小
-    """
-    global fps #每秒取样数
-    size = int(fps * sec)
-    prev = 0#int(size*0.02)
-    data = np.zeros(prev+size+int(size*0.7), dtype = np.float32)
-    # 频率越高，声音越小
-    #sound = 1-(mid-n)*(mid-n)/(120*120)
-    sound = (100-n)**2/100**2
-    #if n > mid:
-    #    sound = -sound
-    offset = random.random()*math.pi
-    for i in range(len(data)):
-        s0 = i/fps
-        w1 = (s0**0.25)
-        w2 = math.exp(-1*(s0**2)/(10*(0.2**2)))
-        y = w1*math.sin(offset+2*math.pi*s0*rate)*w2
-        #y = math.exp(-1/(2*0.2*0.2)*s0*s0)
-        #y=math.exp(-1*(s0**2)/(11*(0.2**2)))
-        #y=w1*w2
-        y*=(400/rate)**0.5
-        y*=0.5
-        #y*=nrange
-        y*=msound
-        data[prev+i] = y
-    return data#rst
-
-pass
 mid = 50
 import random
-def f2(rate, n, sec = 1.0, msound = 1.0, index=0):
-    """
-    rate: 频率
-    n: 乐谱音符（1234567）
-    sec: 声波发音时间，单位秒
-    msound: 全局音量大小
-    """
-    global fps #每秒取样数
-    size = int(fps * sec)
-    prev = 0#int(size*0.02)
-    data = np.zeros(prev+size+int(size*0.5), dtype = np.float32)
-    # 频率越高，声音越小
-    #sound = 1-(mid-n)*(mid-n)/(120*120)
-    sound = (100-n)**2/100**2
-    #if n > mid:
-    #    sound = -sound
-    offset = index*math.pi*0.03*random.random()*0
-    #print(size)
-    for i in range(size):
-        #s0 = rate*i
-        #y = (s0**0.25)*math.sin(2*math.pi*s0/fps)*math.exp(-1/(2*0.2*0.2)*s0*s0)
-        x0 = i*2*math.pi*rate/fps
-        #x0 += (random.random()-0.5)*0.1
-        #sound = math.cos(abs(mid-n)/50*math.pi*0.5)
-        y = math.sin(x0+offset)*(0.1*sound+sound*0.9)
-        #y *=(1+(random.random()-0.5)*0.1)
-        # 音量从1到0
-        r = (size-i)/size
-        y *= r*msound
-        #y *= math.cos(i*math.pi/size)*0.5+0.5
-        #y *= nrange
-        y = max(-nrange+1,min(nrange-1, y))
-        data[prev+i] = y
-    return data#rst
-
-pass
 def f3(rate, n, sec = 1.0, msound = 1.0, index=0):
     """
     rate: 频率
@@ -104,7 +36,7 @@ def f3(rate, n, sec = 1.0, msound = 1.0, index=0):
     global fps #每秒取样数
     size = int(fps * sec)
     #data = np.zeros(size+int(size*0.5), dtype = np.float32)
-    data = np.arange(0,size+int(size*0.5), 1.0)
+    data = np.arange(0,size+int(size*0.5)*0, 1.0)
     # 频率越高，声音越小
     #sound = 1-(mid-n)*(mid-n)/(120*120)
     sound = (100-n)**2/100**2
@@ -121,14 +53,103 @@ def f3(rate, n, sec = 1.0, msound = 1.0, index=0):
     return data
 
 pass
+class F4(Base):
+    def init(self, fps, n=1, r = 0.75):
+        self.n = n
+        self.r = r
+        self.fps = fps
+    def call(self, rate, n, sec = 1.0, msound = 1.0):
+        """
+        rate: 频率
+        n: 乐谱音符（1234567）
+        sec: 声波发音时间，单位秒
+        msound: 全局音量大小
+        """
+        size = int(self.fps * sec)
+        data = np.arange(0,size+int(size*0.5)*0, 1.0)
+        # 频率越高，声音越小
+        sound = (100-n)**2/100**2
+        x = data[:size]
+        x0 = x*2*math.pi*rate/fps
+        dec = (size-x)/size
+        dec = 0.5*dec*(dec+1)
+        n = 1
+        y = None
+        rate = 1.0
+        for i in range(self.n):
+            if i==self.n-1:
+                val = rate
+            else:
+                val = rate*self.r
+            yi = np.sin(x0*n)*val*dec
+            if i==0:
+                y = yi
+            else:
+                y+=yi
+            n<<=1
+            dec=dec*dec
+            rate *= (1-self.r)
+        y *= msound*sound
+        data[:size]=y
+        #data[size:]=0
+        return data
+
+pass
+class F5(Base):
+    def init(self, fps, n=1, r = 0.75):
+        self.n = n
+        self.r = r
+        self.fps = fps
+    def call(self, rate, n, sec = 1.0, msound = 1.0):
+        """
+        rate: 频率
+        n: 乐谱音符（1234567）
+        sec: 声波发音时间，单位秒
+        msound: 全局音量大小
+        """
+        size = int(self.fps * sec)
+        data = np.arange(0,size+int(size*0.5)*0, 1.0)
+        # 频率越高，声音越小
+        sound = (100-n)**2/100**2
+        x = data[:size]
+        x0 = x*2*math.pi*rate/fps
+        dec = (size-x)/size
+        dec = 0.5*dec*(dec+1)
+        n = 1
+        y = None
+        rate = 1.0
+        for i in range(self.n):
+            if i==self.n-1:
+                val = rate
+            else:
+                val = rate*self.r
+            val = (1.0-(i+1)/self.n)**5
+            yi = np.sin(x0*n)*val*dec
+            if i==0:
+                y = yi
+            else:
+                y+=yi
+            n+=1
+            dec=dec*dec
+            rate *= (1-self.r)
+        y *= msound*sound
+        data[:size]=y
+        #data[size:]=0
+        return data
+
+pass
 f=f3
 import random
 class CacheFc:
-    def __init__(self,n=10):
+    def __init__(self,f=None,sec=1.0, n=10):
+        if f is None:
+            f = F4(fps, 100, 0.9)
+        self.f = f
         #self.cache = {}
         self.index=0
         self.n = n
         self.caches = []
+        self.sec = sec
         for i in range(n):
             self.caches.append({})
     def __call__(self, rate, n):
@@ -136,12 +157,14 @@ class CacheFc:
         self.index=(self.index+1)%self.n
         cache = self.caches[0]
         if rate not in cache:
-            cache[rate] = f(rate, n, 1.0)
+            cache[rate] = self.f(rate, n, self.sec)
         return cache[rate]
 
 pass
-def create():
-    return p.open(format=p.get_format_from_width(nbyte), channels=1, rate=fps, output=True)
+def create(rate=None):
+    if rate is None:
+        rate = fps
+    return p.open(format=p.get_format_from_width(nbyte), channels=1, rate=rate, output=True)
 
 pass
 
@@ -151,6 +174,11 @@ def close(stream):
 
 pass
 import threading
+
+def release():
+    p.terminate()
+
+pass
 
 
 class Sound:
@@ -162,13 +190,21 @@ class Sound:
         return self.stream.out_records()
     def mode(self, val):
         self.stream.mode(val)
-    def __init__(self):
-        self.fc = CacheFc()
+    def __init__(self, fc = None, stream = None, cache_st = None):
+        if fc is None:
+            fc = CacheFc()
+        self.fc = fc
         for i in range(15,79):
             rate = fn(i)
             self.fc(rate, i)
         self.zero = create()
-        self.stream = cache.Stream(self.zero.write, nrange,100, int(fps*0.05), ndtype, left=1)
+        if stream is None:
+            stream = create()
+        self.zero = stream
+        if cache_st is None:
+            cache_st = cache.Stream(self.zero.write, nrange,100, int(fps*0.05), ndtype, left=1)
+        self.stream = cache_st
+    def start(self):
         self.stream.start()
     def play(self, n):
         if not self.stream.running:
@@ -181,10 +217,6 @@ class Sound:
         self.stream.stop()
         time.sleep(1.0)
         close(self.zero)
-
-pass
-sd = Sound()
-def release():
-    p.terminate()
+        release()
 
 pass

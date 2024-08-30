@@ -20,7 +20,7 @@ class KB(kb.KB):
             while self.running:
                 v = getch()
                 self.callback(v, self)
-    def init(self, callback):
+    def init(self, callback=None):
         self.callback = callback
         self.running = False
 

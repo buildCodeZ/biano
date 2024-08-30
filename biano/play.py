@@ -1,12 +1,11 @@
 #coding=utf-8
 
 from . import sound1 as sound
-sd = sound.sd
-from buildz import Base, xf
+#sd = sound.sd
+from buildz import Base, xf, pyz, fz
 import time, sys, os
 import threading as th
-res = os.path.join(os.path.dirname(os.path.abspath(__file__)), "res")
-
+from . import ioc
 keys = "1,%1,2,%2,3,4,%4,5,%5,6,%6,7".split(",")
 k2n = {k:i for k,i in zip(keys, range(len(keys)))}
 base = 40
@@ -29,18 +28,10 @@ def v2n(v):
 
 pass
 
-
-def rfp(fp):
-    bak = fp
-    if not os.path.isfile(fp):
-        fp = os.path.join(res, fp)
-    if not os.path.isfile(fp):
-        raise Exception(f"not such file: {bak}")
-    return fp
-
-pass
+from .tools import rfp
 class Play(Base):
-    def init(self, sec = 1.0, base = 40):
+    def init(self, sd, sec = 1.0, base = 40):
+        self.sd = sd
         self.sec = sec
         self.base = base
         self.lk = th.Lock()
@@ -82,6 +73,8 @@ class Play(Base):
         if type(datas)!=list:
             datas = [datas]
         rst = self.products(datas)
+        self.run(rst)
+    def run(self, rst):
         for dt in rst:
             prev = 0
             for v,b in dt:
@@ -89,12 +82,28 @@ class Play(Base):
                 if sec>0:
                     time.sleep(sec)
                 if v is not None and v>0:
-                    sd.play(v)
+                    self.sd.play(v)
                 prev = b
             left = (1.0-prev)*self.sec
             if left>0:
                 time.sleep(left)
+    def replay(self, fp):
+        self.sd.start()
+        fp = rfp(fp)
+        rds = xf.loadf(fp)
+        self.simple(rds)
+    def simple(self, dt):
+        base = 0.0
+        for v,b in dt:
+            sec = (b-base)
+            if sec>0:
+                time.sleep(sec)
+            if v is not None and v>0:
+                self.sd.play(v)
+            base = b
+        time.sleep(1.0)
     def call(self, fp):
+        self.sd.start()
         fp = rfp(fp)
         conf = xf.loadf(fp)
         sec = conf['sec']
@@ -102,7 +111,7 @@ class Play(Base):
         sec = xf.g(conf, sec=1.0)
         base = xf.g(conf, base=40)
         sound = xf.g(conf, sound=0.5)
-        sd.sound(sound)
+        self.sd.sound(sound)
         self.sec = sec
         self.base = base
         fps = [rfp(fp) for fp in fps]
@@ -111,13 +120,12 @@ class Play(Base):
 pass
 
 def test():
+    mg = ioc.build("default_env.js")
     fp = "datas/conf.js"
     if len(sys.argv)>1:
         fp = sys.argv[1]
-    Play()(fp)
+    mg.set_env("play.confs", fp)
+    mg.get("play")
 
 pass
-if __name__=="__main__":
-    test()
-
-pass
+pyz.bylocals(locals(), test)

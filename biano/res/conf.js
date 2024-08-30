@@ -40,7 +40,7 @@ offsets: {
     '-': {left:0, right:0}
     '=': {left:-24, right:24}
 }
-// 声音混合模式: mix/weight
+// 声音混合模式: mix/weight（该配置项已无效）
 combines: {
     '+': weight
     "_": mix
@@ -55,3 +55,7 @@ inits: [
 ]
 // 音量
 sound: 0.1
+// 退出按键
+quit: '|'
+// 是否询问保存记录
+save_records: true

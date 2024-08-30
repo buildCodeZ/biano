@@ -1,8 +1,7 @@
 #coding=utf-8
 from biano import confkeys as keys
-def run():
-    keys.run()
+from . import ioc
 if __name__=="__main__":
-    run()
+    ioc.run()
 
 pass

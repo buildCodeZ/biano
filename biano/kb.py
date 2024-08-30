@@ -9,7 +9,9 @@ class KB(WBase):
         return True
     def run(self):
         pass
-    def init(self, callback):
+    def set_callback(self, callback):
+        self.callback = callback
+    def init(self, callback=None):
         """
             callback(press_key, KB)
         """

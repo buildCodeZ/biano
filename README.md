@@ -2,18 +2,32 @@
 ```
 键盘按键钢琴，监听按键发出声音，可以后台运行
 keyboard piano, listen key press to play sound, can run background
-运行(run):
-python -m biano
-or
-python -m biano configpath.js
 
-演奏乐谱：
-python -m biano.play 配置文件.js
-默认乐谱:
+1, 运行按键模式:
+运行简单按键模式:
+python -m biano.keys
+运行复杂按键模式：（建议先看下hard.js配置，在biano模块文件夹/res目录下）:
+python -m biano.keys hard.js
+运行自定义按键:
+python -m biano.keys 按键配置文件.js
+程序运行结束自动记录弹奏到当前文件夹下，可以进行重放(如果不打算记录和保存，在biano模块文件夹/res/conf.js里把save_records改成false)
+
+2, 运行演奏乐谱：
+演奏默认乐谱:
 python -m biano.play
+演奏配置乐谱
+python -m biano.play 乐谱配置文件.js
 
-运行复杂按键模式（建议先看下hard.js配置，在biano模块文件夹/res目录下）:
-python -m biano hard.js
+3, 重放记录:
+python -m biano.replay 记录文件路径
+
+4，主体:
+默认(按键模式，默认hard.js)
+python -m biano
+自定义运行模式(参考biano模块文件夹/res/default_env.js编写)：
+python -m biano 配置文件.js
+
+程序可以多开，可以开一个play当背景音，再开一个keyboard
 
 按键对应音符:
 keys to musical note:
@@ -59,4 +73,10 @@ v0.2.4:
 加乐谱演奏模式
 python -m biano.play 配置文件.js
 噪音有待处理
+
+v0.2.41:
+用buildz进行ioc和配置（好处是配置文件用起来方便了，代价是启动变慢）
+声波做smooth来去噪，此外加了泛音，感觉噪声少了
+音色可配置
+
 ```

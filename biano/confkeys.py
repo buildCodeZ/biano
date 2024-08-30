@@ -2,9 +2,11 @@
 
 import pynput
 from buildz.tz import getch
-from buildz import xf, Base
+from buildz import xf, Base, fz
 from biano import sound1 as sound
 import sys,os
+from .tools import rfp
+import time
 # try:
 #     from .pynkb import KB
 # except:
@@ -13,7 +15,7 @@ import sys,os
 
 # pass
 class ConfPress(Base):
-    def init(self, conf):
+    def init(self, conf, sd, kb=None):
         self.mlefts = conf['left']
         self.mrights = conf['right']
         self.lr2base = {'left':0, 'right':1}
@@ -21,6 +23,7 @@ class ConfPress(Base):
         self.k2base = {}
         self.bases = [40,40]
         self.moves = [0,0]
+        self.records = []
         for k in self.mlefts:
             self.k2base[k] = 0
             self.maps[k] = self.mlefts[k]
@@ -32,16 +35,22 @@ class ConfPress(Base):
         self.mcombines = conf['combines']
         self.inits = conf['inits']
         self.skb = conf['kb']
-        self.vsound = xf.g(conf, sound=1.0)
-        sound.sd.sound(self.vsound)
-        if self.skb == 'full':
-            from .pynkb import KB
-            self.kb = KB(self.press)
-        elif self.skb == 'current':
-            from .bzkb import KB
-            self.kb = KB(self.press)
+        #self.vsound = xf.g(conf, sound=1.0)
+        self.quit = xf.g(conf, quit = "esc")
+        self.save_records = xf.g(conf, save_records = False)
+        self.sd = sd
+        #self.sd.sound(self.vsound)
+        if kb is None:
+            if self.skb == 'full':
+                from .pynkb import KB
+                self.kb = KB(self.press)
+            elif self.skb == 'current':
+                from .bzkb import KB
+                self.kb = KB(self.press)
+            else:
+                raise Exception(f"unsupport kb mode: {self.skb}")
         else:
-            raise Exception(f"unsupport kb mode: {self.skb}")
+            self.kb = kb
     def deal(self, c):
         if c in self.maps:
             kbase = self.k2base[c]
@@ -50,7 +59,9 @@ class ConfPress(Base):
                 return
             if vc >= 89:
                 return
-            sound.sd.play(vc)
+            if self.save_records:
+                self.records.append([vc, time.time()])
+            self.sd.play(vc)
         elif c in self.moffsets:
             _map = self.moffsets[c]
             for k in _map:
@@ -63,16 +74,32 @@ class ConfPress(Base):
             #print(f"bases: {self.bases}")
         elif c in self.mcombines:
             mode = self.mcombines[c]
-            sound.sd.mode(mode)
+            self.sd.mode(mode)
+    def is_quit(self, key, c, kb):
+        if self.quit == "esc":
+            return kb.is_esc(key)
+        return self.quit==c
     def press(self, key, kb):
         c = kb.char(key)
         if c is not None:
             self.deal(c)
-        if kb.is_esc(key):
+        if self.is_quit(key, c, kb):
             kb.stop()
-            sound.sd.close()
-            sound.release()
+            self.sd.close()
+            self.try_save()
+    def try_save(self):
+        if not self.save_records or len(self.records)==0:
+            return
+        date = time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time()))
+        fp = f"record_{date}.js"
+        rds = self.records
+        base = rds[0][1]
+        rds = [[v, b-base] for v,b in rds]
+        rs = xf.dumps(rds)
+        fz.write(rs, fp, 'w')
+        print(f"记录已经保存至'{fp}'，可以运行\n    python -m biano.replay \"{fp}\"\n重放")
     def run(self):
+        self.sd.start()
         for c in self.inits:
             self.deal(c)
         lks = list(self.mlefts.keys())
@@ -88,17 +115,31 @@ class ConfPress(Base):
         print(f"按键: 左手: {lks} 右手: {rks}")
         print(f"修改音调: 按键: {nbs}")
         print(f"修改左右音调偏移: 按键: {nofs}")
-        print(f"修改模式: 按键: {ncs}")
-        print("按esc退出")
+        #print(f"修改模式: 按键: {ncs}")
+        print(f"按'{self.quit}'退出")
         print(f"press to sound: left: {lks} right: {rks}")
         print(f"change tone: press {nbs}")
         print(f"change left/right tone offset: press {nofs}")
-        print(f"change mode: press {ncs}")
-        print("press esc to exit")
+        #print(f"change mode: press {ncs}")
+        print(f"press '{self.quit}' to exit")
         #KB(self.press).run()
         self.kb.run()
 
 pass
+def build(fps, sd, kb=None):
+    fps = [rfp(fp) for fp in fps if fp is not None]
+    conf = None
+    for fp in fps:
+        _conf = xf.loadf(fp)
+        if conf is None:
+            conf = _conf
+        else:
+            xf.fill(_conf, conf, 1)
+    return ConfPress(conf, sd, kb)
+
+pass
+
+
 def run():
     res = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'res')
     dfp = os.path.join(res, "conf.js")

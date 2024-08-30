@@ -7,8 +7,8 @@ def test():
     mg = ioc.build("default_env.js")
     if len(sys.argv)>1:
         fp = sys.argv[1]
-        mg.set_env("fp.keys.custom", fp)
-    mg.get("keyboard")
+        mg.set_env("file.records", fp)
+    mg.get("replay")
 
 pass
 

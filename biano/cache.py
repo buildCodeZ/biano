@@ -5,6 +5,22 @@ import math
 from buildz.tools import *
 import threading as th
 import time
+def max_pool(datas, num):
+    datas = datas.reshape(-1, num)
+    val = datas.max(axis=1)
+    for i in range(num):
+        datas[:,i] = val
+    return datas.reshape(-1)
+
+pass
+def avg_pool(datas, num):
+    datas = datas.reshape(-1, num)
+    val = datas.mean(axis=1)
+    for i in range(num):
+        datas[:,i] = val
+    return datas.reshape(-1)
+
+pass
 # 平滑 算子，和卷积一个样
 def smooth(datas, ws):
     if ws is None:
@@ -35,7 +51,17 @@ class Stream(Base):
         self.running=False
     def sound(self, val):
         self.rate = val
-    def init(self, output, nrange ,num, size, ndtype, left=1, r_new = 1.0, r_old = 0.7, ws = None, rate = 1.0, zero = True):
+    def init(self, output, nrange ,num, size, ndtype, left=1, r_new = 1.0, r_old = 0.7, ws = None, rate = 1.0, zero = True, fc_pool=None, pool_size=0):
+        self.fc_pool = fc_pool
+        self.pool_size = pool_size
+        self.cut_size = size
+        if self.pool_size > 0:
+            cut_size = size//pool_size
+            if size%pool_size>0:
+                cut_size+=1
+            cut_size*=pool_size
+            self.cut_size = cut_size
+            #print(f"self.cut_size: {self.cut_size}, size: {size}")
         self.rate = rate
         self.r_new = r_new
         self.ndtype = ndtype
@@ -71,6 +97,21 @@ class Stream(Base):
         self.records = []
         self.record=False
         self.combine = self.combine_add
+        # self.cut_rate = cut_rate
+        # self.cut_num = self.size*self.cut_rate
+        # self.spt_set = 0
+        # self.spt_zero = 0
+        # if self.cut_rate>0 and self.cut_rate<1.0:
+        #     if self.cut_rate>0.5:
+        #         self.spt_set = int(1/(1-self.cut_rate))
+        #         if self.spt_set == 1:
+        #             self.spt_set = 0
+        #     else:
+        #         self.spt_zero = int(1/self.cut_rate)
+        #         if self.spt_zero==1:
+        #             self.spt_zero=0
+        #print(f"[TZ] spt_set: {self.spt_set}")
+        #print(f"[TZ] spt_zero: {self.spt_zero}")
     def do_record(self, val=True):
         self.record=val
     def out_records(self):
@@ -81,6 +122,13 @@ class Stream(Base):
                 dt[:]*=0.01
         else:
             dt[:]=0
+    def cut(self):
+        if self.fc_pool is not None and self.pool_size>0:
+            cuts = self.data[self.offset*self.size:self.offset*self.size+self.cut_size]
+            if cuts.size!=self.cut_size:
+                size = (cuts.size//self.pool_size)*self.pool_size
+                cuts = cuts[:size]
+            self.fc_pool(cuts, self.pool_size)
     def fetch_smooth(self):
         if self.ws is None:
             return self.fetch()
@@ -105,6 +153,7 @@ class Stream(Base):
                     if self.offset==self.lock_offset:
                         time.sleep(0.001)
                         continue
+                    self.cut()
                     tmp = self.fetch_smooth()
                     self.offset=(self.offset+1)%self.num
                     break

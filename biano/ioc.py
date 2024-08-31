@@ -14,6 +14,7 @@ def build(fp_env=None):
         fp_env = rfp(fp_env)
         envs = xf.loadf(fp_env)
         mg.set_envs(envs)
+    print("initializing...")
     return mg
 
 pass

@@ -29,6 +29,8 @@ python -m biano 配置文件.js
 
 程序可以多开，可以开一个play当背景音，再开一个keyboard
 
+PS: 一些配置一直用的固定值，没用试过其他值，修改后可能有问题
+
 按键对应音符:
 keys to musical note:
 

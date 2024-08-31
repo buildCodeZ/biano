@@ -12,6 +12,10 @@
     // 声音流缓存数量，默认100
     // stream.cache.num: 100
 
+    // 池化类型，max或avg，默认max
+    // stream.cache.pool.type: max
+    // 声波池化，默认0（不池化）
+    // stream.cache.pool.size: 0
     // 音量
     sound.voice: 0.15
 

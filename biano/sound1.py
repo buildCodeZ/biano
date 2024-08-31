@@ -5,7 +5,7 @@ import numpy as np
 import math
 from . import cache
 from buildz import Base
-fps = 4096*10*8
+#fps = 4096*10*8
 p = pyaudio.PyAudio()
 nbyte = 2
 ndtype = np.int16
@@ -71,7 +71,7 @@ class F4(Base):
         # 频率越高，声音越小
         sound = (100-n)**2/100**2
         x = data[:size]
-        x0 = x*2*math.pi*rate/fps
+        x0 = x*2*math.pi*rate/self.fps
         dec = (size-x)/size
         dec = 0.5*dec*(dec+1)
         for i in range(self.base):
@@ -168,9 +168,7 @@ class CacheFc:
         return cache[rate]
 
 pass
-def create(rate=None):
-    if rate is None:
-        rate = fps
+def create(rate):
     return p.open(format=p.get_format_from_width(nbyte), channels=1, rate=rate, output=True)
 
 pass
@@ -204,7 +202,6 @@ class Sound:
         for i in range(15,79):
             rate = fn(i)
             self.fc(rate, i)
-        self.zero = create()
         if stream is None:
             stream = create()
         self.zero = stream

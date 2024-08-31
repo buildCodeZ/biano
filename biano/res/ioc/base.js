@@ -4,6 +4,18 @@
     var: numpy.int16
 }
 {
+    id: stream.cache.pool.type
+    type: env
+    key: stream.cache.pool.type
+    default:max
+}
+{
+    id: stream.cache.pool.size
+    type: env
+    key: stream.cache.pool.size
+    default:0
+}
+{
     id: stream.cache.zero
     type: env
     key: stream.cache.zero

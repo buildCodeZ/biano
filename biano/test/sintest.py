@@ -43,21 +43,11 @@ r = x0/mx
 r=1-r
 r=r**20
 #show([r])
-
-r = 0.9
-n = 10
-rate = 1.0
-rst = []
-for i in range(n):
-    if i==n-1:
-        val = rate
-    else:
-        val = rate*r
-    rst.append(val)
-    rate *= (1-r)
-
-pass
-rst = np.array(rst)
-show([rst])
-
-
+size = 1024
+x = np.arange(size)
+v = (size-x)/size
+y = 0.5*v*(v+1)
+z = v*v
+l = y*y
+k = ((size-2*x)/size*0.5+0.5)**3
+show([y,k])

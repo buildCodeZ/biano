@@ -69,10 +69,13 @@ class F4(Base):
         size = int(self.fps * sec)
         data = np.arange(0,size+int(size*0.5)*0, 1.0)
         # 频率越高，声音越小
-        sound = (100-n)**2/100**2
+        sound = (100-n+15)/100
+        sound=sound**3
+        #print(f"sound on {n}: {sound}")
         x = data[:size]
         x0 = x*2*math.pi*rate/self.fps
         dec = (size-x)/size
+        #dec = ((size-0.5*x)/size*0.5+0.5)**4
         dec = 0.5*dec*(dec+1)
         for i in range(self.base):
             dec*=dec
@@ -114,7 +117,9 @@ class F5(Base):
         size = int(self.fps * sec)
         data = np.arange(0,size+int(size*0.5)*0, 1.0)
         # 频率越高，声音越小
-        sound = (100-n)**2/100**2
+        sound = (100-n+15)/100
+        sound=sound**21
+        print(f"sound on {n}: {sound}")
         x = data[:size]
         x0 = x*2*math.pi*rate/fps
         dec = (size-x)/size

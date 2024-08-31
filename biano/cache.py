@@ -35,7 +35,7 @@ class Stream(Base):
         self.running=False
     def sound(self, val):
         self.rate = val
-    def init(self, output, nrange ,num, size, ndtype, left=1, r_new = 1.0, r_old = 0.7, ws = None, rate = 1.0):
+    def init(self, output, nrange ,num, size, ndtype, left=1, r_new = 1.0, r_old = 0.7, ws = None, rate = 1.0, zero = True):
         self.rate = rate
         self.r_new = r_new
         self.ndtype = ndtype
@@ -51,6 +51,7 @@ class Stream(Base):
         self.lock = th.Lock()
         self.running = False
         self.output = output
+        self.zero = zero
         ws = np.array(ws)
         # n = 1.0
         # ws = []
@@ -75,9 +76,11 @@ class Stream(Base):
     def out_records(self):
         return np.vstack(self.records).reshape(-1)
     def clean_dt(self, dt):
-        if dt.max()-dt.min()>0.01:
-            dt[:]*=0.01
-        dt[:]=0
+        if not self.zero:
+            if dt.max()-dt.min()>0.01:
+                dt[:]*=0.01
+        else:
+            dt[:]=0
     def fetch_smooth(self):
         if self.ws is None:
             return self.fetch()

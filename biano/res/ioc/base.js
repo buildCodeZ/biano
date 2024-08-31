@@ -4,6 +4,18 @@
     var: numpy.int16
 }
 {
+    id: stream.cache.zero
+    type: env
+    key: stream.cache.zero
+    default:true
+}
+{
+    id: sound.base.dec
+    type: env
+    key: sound.base.dec
+    default:0
+}
+{
     id: sound.fps
     type: env
     key: sound.fps

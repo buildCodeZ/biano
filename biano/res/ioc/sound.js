@@ -6,6 +6,7 @@
         [ref, sound.fps]
         [ref, sound.base.count]
         [ref, sound.base.rate]
+        [ref, sound.base.dec]
     ]
 }
 {

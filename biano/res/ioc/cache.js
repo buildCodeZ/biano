@@ -14,6 +14,7 @@ datas: [
         maps: {
             ws: [ref, stream.filter.ws]
             rate: [ref, sound.voice]
+            zero: [ref, stream.cache.zero]
         }
     }
 ]

@@ -1,5 +1,6 @@
 {
-    // 采样频率(每秒多少采样)，默认327680
+    // 采样频率(每秒多少采样)，默认327680，减小频率可以减少计算开销（计算开销应该不大，用了numpy）
+    // 修改这个记得把stream.cache.unit一起修改了，建议是stream.cache.unit=int(sound.fps*0.05)
     // sound.fps: 327680
 
     // 声音流单次播放采样数，默认16384==fps*0.05(0.05秒)
@@ -23,6 +24,9 @@
     // 基音*rate+(1-rate)*rate*泛音[1]+(1-rate)*(1-rate)*rate*泛音[2]+...
     sound.base.rate:0.9
 
+    // 声波衰减级别(0-n)，0衰减最少（还是在衰减）
+    // sound.base.dec: 0
+
     // 定制化按键布局文件路径，默认是空，只有进行按键时用到，可以自己写一个
     // 已有的布局文件: conf.js, hard.js
     // 只对keyboard生效
@@ -36,10 +40,14 @@
     // 只对replay生效
     file.records: null
 
+    // 不同电脑声音设备不一样，
+    // 觉得声音有时候突然变小可以试试把这个值设置成false，对应代码biano.cache.Stream.clean_dt
+    stream.cache.zero: false
+
     // 按键模式
     // 只对按键弹奏生效，这里配置了就以这里为准，keyboard配置文件里的kb配置将不会生效
     // keyboard.type: current
-    
+
     // 运行程序，默认keyboard
     /*
         运行程序，默认keyboard

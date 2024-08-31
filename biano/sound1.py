@@ -54,10 +54,11 @@ def f3(rate, n, sec = 1.0, msound = 1.0, index=0):
 
 pass
 class F4(Base):
-    def init(self, fps, n=1, r = 0.75):
+    def init(self, fps, n=1, r = 0.75, base=0):
         self.n = n
         self.r = r
         self.fps = fps
+        self.base = base
     def call(self, rate, n, sec = 1.0, msound = 1.0):
         """
         rate: 频率
@@ -73,6 +74,8 @@ class F4(Base):
         x0 = x*2*math.pi*rate/fps
         dec = (size-x)/size
         dec = 0.5*dec*(dec+1)
+        for i in range(self.base):
+            dec*=dec
         n = 1
         y = None
         rate = 1.0
@@ -96,10 +99,11 @@ class F4(Base):
 
 pass
 class F5(Base):
-    def init(self, fps, n=1, r = 0.75):
+    def init(self, fps, n=1, r = 0.75, base=0):
         self.n = n
         self.r = r
         self.fps = fps
+        self.base = base
     def call(self, rate, n, sec = 1.0, msound = 1.0):
         """
         rate: 频率
@@ -115,6 +119,9 @@ class F5(Base):
         x0 = x*2*math.pi*rate/fps
         dec = (size-x)/size
         dec = 0.5*dec*(dec+1)
+        for i in self.base:
+            dec*=dec
+        #dec*=dec
         n = 1
         y = None
         rate = 1.0
